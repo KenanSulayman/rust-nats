@@ -41,6 +41,7 @@ pub struct ServerInfo {
     host: String,
     port: u16,
     credentials: Option<Credentials>,
+    token: Option<String>,
     max_payload: usize,
     tls_required: bool,
 }
@@ -85,6 +86,25 @@ impl ConnectNoCredentials {
         map.insert("verbose".to_owned(), Value::Bool(self.verbose));
         map.insert("pedantic".to_owned(), Value::Bool(self.pedantic));
         map.insert("name".to_owned(), Value::String(self.name));
+        serde_json::to_string(&map)
+    }
+}
+
+#[derive(Debug)]
+struct ConnectWithToken {
+    verbose: bool,
+    pedantic: bool,
+    name: String,
+    token: String
+}
+
+impl ConnectWithToken {
+    pub fn into_json(self) -> serde_json::Result<String> {
+        let mut map = serde_json::Map::new();
+        map.insert("verbose".to_owned(), Value::Bool(self.verbose));
+        map.insert("pedantic".to_owned(), Value::Bool(self.pedantic));
+        map.insert("name".to_owned(), Value::String(self.name));
+        map.insert("auth_token".to_owned(), Value::String(self.token));
         serde_json::to_string(&map)
     }
 }
