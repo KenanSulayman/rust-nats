@@ -31,13 +31,13 @@ const URI_SCHEME: &'static str = "nats";
 const RETRIES_MAX: u32 = 10;
 
 #[derive(Clone, Debug)]
-struct Credentials {
+pub struct Credentials {
     username: String,
     password: String,
 }
 
 #[derive(Clone, Debug)]
-struct ServerInfo {
+pub struct ServerInfo {
     host: String,
     port: u16,
     credentials: Option<Credentials>,
@@ -163,6 +163,25 @@ impl Client {
             })
         }
         thread_rng().shuffle(&mut servers_info);
+        Ok(Client {
+            servers_info: servers_info,
+            server_idx: 0,
+            verbose: false,
+            pedantic: false,
+            name: DEFAULT_NAME.to_owned(),
+            state: None,
+            sid: 1,
+            circuit_breaker: None,
+            tls_config: None,
+            subscriptions: HashMap::new(),
+        })
+    }
+
+    pub fn new_with_server_info(servers_info: &Vec<ServerInfo>) -> Result<Client, NatsError> {
+        let mut servers_info = servers_info.clone();
+        
+        thread_rng().shuffle(&mut servers_info);
+
         Ok(Client {
             servers_info: servers_info,
             server_idx: 0,
